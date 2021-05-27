@@ -19,17 +19,6 @@
 
 #define CONFIG_ZYNQ_HISPD_BROKEN
 
-/*
- * QSPI flash mapping
- *
- *   start       end      size     name
- * ---------------------------------------
- * 0x0000000 - 0x0500000  0x500000  boot.bin(5MB)
- * 0x0500000 - 0x0520000  0x020000  ubootenv(128KB)
- * 0x0520000 - 0x0980000  0x460000  uImage(4.6MB)
- * 0x0980000 - 0x09a0000  0x020000  devicetree(128KB)
- * 0x09a0000 - 0x0fa0000  0x600000  data(6MB)
- */
 
 /*Required for uartless designs */
 #ifndef CONFIG_BAUDRATE
@@ -55,10 +44,9 @@
 	CONSOLE_ARG \ 
 	PSSERIAL0 \ 
 	"nc=setenv stdout nc;setenv stdin nc;\0" \ 
-    "ethaddr=00:0a:35:00:01:22\0"	\
 	"bootenv=uEnv.txt\0" \ 
 	"importbootenv=echo \"Importing environment from SD ...\"; " \ 
-	"env import -t ${loadbootenv_addr} $filesize\0" \ 
+		"env import -t ${loadbootenv_addr} $filesize\0" \ 
 	"loadbootenv=load mmc $sdbootdev:$partid ${loadbootenv_addr} ${bootenv}\0" \ 
 	"sd_uEnvtxt_existence_test=test -e mmc $sdbootdev:$partid /uEnv.txt\0" \ 
 	"uenvboot=" \ 
@@ -78,11 +66,12 @@
 	"dtbnetstart=0x23fff000\0" \ 
 	"loadaddr=0x10000000\0" \ 
 	"boot_img=BOOT.BIN\0" \ 
+    "display_type=HDMI\0" \
 	"load_boot=tftpboot ${clobstart} ${boot_img}\0" \ 
 	"update_boot=setenv img boot; setenv psize ${bootsize}; setenv installcmd \"install_boot\"; run load_boot ${installcmd}; setenv img; setenv psize; setenv installcmd\0" \ 
 	"install_boot=mmcinfo && fatwrite mmc ${sdbootdev} ${clobstart} ${boot_img} ${filesize}\0" \ 
-	"bootenvsize=0x40000\0" \ 
-	"bootenvstart=0x100000\0" \ 
+	"bootenvsize=0x20000\0" \ 
+	"bootenvstart=0x500000\0" \ 
 	"eraseenv=sf probe 0 && sf erase ${bootenvstart} ${bootenvsize}\0" \ 
 	"jffs2_img=rootfs.jffs2\0" \ 
 	"load_jffs2=tftpboot ${clobstart} ${jffs2_img}\0" \ 
@@ -90,7 +79,7 @@
 	"sd_update_jffs2=echo Updating jffs2 from SD; mmcinfo && fatload mmc ${sdbootdev}:1 ${clobstart} ${jffs2_img} && run install_jffs2\0" \ 
 	"install_jffs2=sf probe 0 && sf erase ${jffs2start} ${jffs2size} && " \ 
 		"sf write ${clobstart} ${jffs2start} ${filesize}\0" \ 
-	"kernel_img=uImage\0" \ 
+	"kernel_img=image.ub\0" \ 
 	"load_kernel=tftpboot ${clobstart} ${kernel_img}\0" \ 
 	"update_kernel=setenv img kernel; setenv psize ${kernelsize}; setenv installcmd \"install_kernel\"; run load_kernel ${installcmd}; setenv img; setenv psize; setenv installcmd\0" \ 
 	"install_kernel=mmcinfo && fatwrite mmc ${sdbootdev} ${clobstart} ${kernel_img} ${filesize}\0" \ 
@@ -104,10 +93,10 @@
 	"test_crc=if imi ${clobstart}; then run test_img; else echo ${img} Bad CRC - ${img} is NOT UPDATED; fi\0" \ 
 	"test_img=setenv var \"if test ${filesize} -gt ${psize}\\; then run fault\\; else run ${installcmd}\\; fi\"; run var; setenv var\0" \ 
 	"netboot=tftpboot ${netstart} ${kernel_img} && bootm\0" \ 
-    "sdboot=setenv bootargs 'console=ttyPS0,115200 root=/dev/ram rw earlyprintk'; mmcinfo && fatload mmc 0 10000000 uImage && " \
-        "fatload mmc 0 13000000 uramdisk.image.gz && fatload mmc 0 16000000 devicetree.dtb && bootm 10000000 13000000 16000000 \0" \
-	"qspiboot=run mmc_args; sf probe 0 && sf read 10000000 520000 460000 && sf read 13000000 980000 10000 && bootm 10000000 - 13000000; \0" \
-    "mmc_args=setenv bootargs console=ttyPS0,115200 root=/dev/mmcblk1p1 rw earlyprintk rootfstype=ext4 rootwait devtmpfs.mount=1\0" \
+	"sdboot=run uenvboot; run cp_kernel2ram && bootm ${netstart}\0" \ 
+	"qspiboot=run mmc_args; sf probe 0 && sf read 10000000 0x00520000 0x00a00000 && bootm ${netstart}; \0" \
+	"mmc_args=setenv bootargs ${console} root=/dev/mmcblk1p1 rw earlyprintk rootfstype=ext4 rootwait devtmpfs.mount=1 myir_encoder.display_type=${display_type}\0" \
+	"default_bootcmd=run cp_kernel2ram && bootm ${netstart}\0" \ 
 ""
 
 #define CONFIG_OF_EMBED
