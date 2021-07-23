@@ -96,6 +96,7 @@
 	"sdboot=run uenvboot; run cp_kernel2ram && bootm ${netstart}\0" \ 
 	"qspiboot=run mmc_args; sf probe 0 && sf read 10000000 0x00520000 0x00a00000 && bootm ${netstart}; \0" \
 	"mmc_args=setenv bootargs ${console} root=/dev/mmcblk1p1 rw earlyprintk rootfstype=ext4 rootwait devtmpfs.mount=1 myir_encoder.display_type=${display_type}\0" \
+	"uenvcmd= setenv bootargs console=ttyPS0,115200 earlycon root=/dev/mmcblk0p2 rw rootwait myir_encoder.display_type=${display_type}\0" \
 	"default_bootcmd=run cp_kernel2ram && bootm ${netstart}\0" \ 
 ""
 

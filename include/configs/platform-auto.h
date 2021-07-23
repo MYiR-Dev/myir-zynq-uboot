@@ -14,7 +14,7 @@
 
 
 /* processor - ps7_cortexa9_0 */
-#define CONFIG_CPU_FREQ_HZ	766666687
+#define CONFIG_CPU_FREQ_HZ	666666687
 #define CONFIG_CLOCKS
 #define CONFIG_ARM_DCC
 #define CONFIG_REMAKE_ELF
@@ -35,6 +35,7 @@
 #define CONFIG_MII
 #define CONFIG_NET_MULTI
 #define CONFIG_NETCONSOLE	1
+#define CONFIG_SERVERIP	192.168.30.2
 #define CONFIG_IPADDR
 
 /* spi_flash - ps7_qspi_0 */
