@@ -23,6 +23,9 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int board_init(void)
 {
+    /* Added by MYIR for MYS-XC7Z010 */
+    myir_board_init();
+
 	return 0;
 }
 
